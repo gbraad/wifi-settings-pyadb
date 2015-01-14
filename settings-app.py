@@ -14,7 +14,7 @@ if sys.platform.startswith("win"):
     sys.path.insert(0, os.path.join(workpath, "modules", "pyadb-master"))
     from pyadb import ADB
     adb = ADB(os.path.join(workpath, "adb-win", "adb"))
-elif sys.platform.startswith("linux"):
+elif sys.platform.startswith("linux") or sys.platform.startswith("darwin"):
     # this old version works under linux
     sys.path.insert(0, os.path.join(workpath, "modules", "pyadb-81712c4"))
     from pyadb import ADB
@@ -25,7 +25,10 @@ elif sys.platform.startswith("linux"):
             adb = ADB(glob.glob(os.path.join(i, "adb"))[0])
             break
     if adb == None:
-        adb = ADB(os.path.join(workpath, "adb-linux", "adb"))
+        if sys.platform.startswith("linux"):
+            adb = ADB(os.path.join(workpath, "adb-linux", "adb"))
+        elif sys.platform.startswith("darwin"):
+            adb = ADB(os.path.join(workpath, "adb-darwin", "adb"))
 
 
 def configure(variables):
