@@ -1,16 +1,31 @@
 import Tkinter as Tk
 import sys
-import os.path
+import os
+import glob
 import socket
 import json
 import re
 workpath = os.path.dirname(sys.argv[0])
-sys.path.insert(0, os.path.join(workpath, "modules", "pyadb-master"))
-from pyadb import ADB
 
 
 fields = "wifi-name", "wifi-type", "wifi-bssid", "wifi-password", "timezone"
-adb = ADB(os.path.join(workpath, "adb-win", "adb"))
+if sys.platform.startswith("win"):
+    # the latest version works under windows
+    sys.path.insert(0, os.path.join(workpath, "modules", "pyadb-master"))
+    from pyadb import ADB
+    adb = ADB(os.path.join(workpath, "adb-win", "adb"))
+elif sys.platform.startswith("linux"):
+    # this old version works under linux
+    sys.path.insert(0, os.path.join(workpath, "modules", "pyadb-81712c4"))
+    from pyadb import ADB
+    adb = None
+
+    for i in os.environ['PATH'].split(':'):
+        if len(glob.glob(os.path.join(i, "adb"))) > 0:
+            adb = ADB(glob.glob(os.path.join(i, "adb"))[0])
+            break
+    if adb == None:
+        adb = ADB(os.path.join(workpath, "adb-linux", "adb"))
 
 
 def configure(variables):
