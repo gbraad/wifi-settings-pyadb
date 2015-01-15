@@ -7,14 +7,16 @@ You can configure the Wifi connection on desktop computer using this tool.
 
 Basically, only the ssid, bssid and password are needed.
 
-On Mac OS X and Linux:
+Mac OS X and Linux:
+--------
 ```
 git clone https://github.com/openflint/wifi-settings-pyadb.git
 cd wifi-settings-pyadb/
 python settings-app.py
 ```
 
-On Windows:
+Windows:
+--------
 ```
 git clone https://github.com/openflint/wifi-settings-pyadb.git
 ```
