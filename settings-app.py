@@ -31,6 +31,37 @@ elif sys.platform.startswith("linux") or sys.platform.startswith("darwin"):
             adb = ADB(os.path.join(workpath, "adb-darwin", "adb"))
 
 
+def save_config(variables):
+    from tkFileDialog import asksaveasfilename
+    import pickle
+    file = asksaveasfilename()
+    if len(file) > 0:
+        db = {}
+        for i in range(0, len(fields)):
+            db[fields[i]] = variables[i].get()
+        print "save to " + file
+        fd = open(file, 'w')
+        pickle.dump(db, fd)
+        fd.close()
+    elif len(file) == 0:
+        print "save cancelled"
+
+
+def load_config(variables):
+    from tkFileDialog import askopenfilename
+    import pickle
+    file = askopenfilename()
+    if len(file) > 0:
+        print "load from " + file
+        fd = open(file)
+        db = pickle.load(fd)
+        fd.close()
+        for i in range(0, len(fields)):
+            variables[i].set(db[fields[i]])
+    elif len(file) == 0:
+        print "load cancelled"
+
+
 def configure(variables):
     adb.wait_for_device()
     adb.forward_socket("tcp:8881", "tcp:8881")
@@ -113,8 +144,20 @@ def makeform(root, fields):
 if __name__ == '__main__':
     root = Tk.Tk()
     vars = makeform(root, fields)
-    btnc = Tk.Button(root, text='Configure', command=(lambda: configure(vars)))
-    btnc.pack(side=Tk.LEFT)
-    btnq = Tk.Button(root, text='Quit!', command=root.quit)
+    frame_l = Tk.Frame(root)
+    frame_r = Tk.Frame(root)
+    frame_l.pack(side=Tk.LEFT)
+    frame_r.pack(side=Tk.RIGHT, fill=Tk.X)
+
+    # button: Configure, Quit
+    btnc = Tk.Button(frame_r, text='Configure', command=(lambda: configure(vars)))
+    btnq = Tk.Button(frame_r, text='Quit!', command=root.quit)
     btnq.pack(side=Tk.RIGHT)
+    btnc.pack(side=Tk.RIGHT)
+    # button: Save, Load
+    btns = Tk.Button(frame_l, text='Save', command=(lambda: save_config(vars)))
+    btnl = Tk.Button(frame_l, text='Load', command=(lambda: load_config(vars)))
+    btns.pack(side=Tk.LEFT)
+    btnl.pack(side=Tk.LEFT)
+
     root.mainloop()
