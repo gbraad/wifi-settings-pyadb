@@ -211,7 +211,7 @@ class ADB():
         if self.__error is not None:
             return ''
         try:
-            print self.__output.partition('\n')
+            # print self.__output.partition('\n')
             self.__devices = self.__output.partition('\n')[2].replace('device','').split()
             
             if self.__devices[1:] == ['no','permissions']:
