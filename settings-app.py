@@ -5,6 +5,8 @@ import glob
 import socket
 import json
 import re
+import thread
+import time
 workpath = os.path.dirname(sys.argv[0])
 
 
@@ -141,9 +143,59 @@ def makeform(root, fields):
         variables.append(var)
     return variables
 
+
+def status_check(c, s, v, o):
+    last_list = None
+    while True:
+        r = adb.get_devices()
+        if r[0] == 0 and len(r[1]) > 0:
+            # green and normal
+            c.itemconfig(s, fill='green')
+            btnc['state'] = 'normal'
+            if last_list != r[1]:
+                menu = o['menu']
+                menu.delete(0, Tk.END)
+                for i in range(0, len(r[1])):
+                    menu.add_command(label=r[1][i], command=(lambda sn=r[1][i]: v.set(sn)))
+                if len(v.get()) > 0 and v.get() in r[1]:
+                    print 'already set'
+                else:
+                    v.set(r[1][0])
+                last_list = r[1]
+        else:
+            # red and disable
+            c.itemconfig(s, fill='red')
+            btnc['state'] = 'disabled'
+            if last_list != r[1]:
+                menu = o['menu']
+                menu.delete(0, Tk.END)
+                v.set('')
+            last_list = []
+        time.sleep(1)
+
+
+def sn_set(*args):
+    print "sn_set: [%s]" % (v.get())
+    if len(v.get()) > 0:
+        adb.set_target_device(v.get())
+
 if __name__ == '__main__':
     root = Tk.Tk()
+    # top
+    frame_t = Tk.Frame(root)
+    frame_t.pack(side=Tk.TOP, anchor=Tk.W, fill=Tk.X)
+    c = Tk.Canvas(frame_t, width=50, height=50)
+    c.pack(side=Tk.LEFT)
+    s = c.create_oval(10, 10, 40, 40)
+
+    v=Tk.StringVar()
+    v.trace('w', sn_set)
+    o=Tk.OptionMenu(frame_t, v, '')
+    o.pack(side=Tk.RIGHT)
+
+    # middle
     vars = makeform(root, fields)
+    # bottom
     frame_l = Tk.Frame(root)
     frame_r = Tk.Frame(root)
     frame_l.pack(side=Tk.LEFT)
@@ -160,4 +212,6 @@ if __name__ == '__main__':
     btns.pack(side=Tk.LEFT)
     btnl.pack(side=Tk.LEFT)
 
+    # thread and loop
+    thread.start_new(status_check, (c, s, v, o))
     root.mainloop()
