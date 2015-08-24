@@ -144,9 +144,9 @@ def makeform(root, fields):
     return variables
 
 
-def status_check(c, s, v, o):
-    last_list = None
-    while True:
+def status_check(root, c, s, v, o):
+    def status_check_every_second():
+    	last_list = None
         r = adb.get_devices()
         if r[0] == 0 and len(r[1]) > 0:
             # green and normal
@@ -171,7 +171,7 @@ def status_check(c, s, v, o):
                 menu.delete(0, Tk.END)
                 v.set('')
             last_list = []
-        time.sleep(1)
+    root.after(1000,status_check_every_second)
 
 
 def sn_set(*args):
@@ -213,5 +213,6 @@ if __name__ == '__main__':
     btnl.pack(side=Tk.LEFT)
 
     # thread and loop
-    thread.start_new(status_check, (c, s, v, o))
+    #thread.start_new(status_check, (root, c, s, v, o))
+    status_check(root, c, s, v, o)
     root.mainloop()
